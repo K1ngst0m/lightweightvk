@@ -80,14 +80,35 @@ VulkanPipelineBuilder& VulkanPipelineBuilder::vertexInputState(
 }
 
 VulkanPipelineBuilder& VulkanPipelineBuilder::colorBlendAttachmentStates(
-    std::vector<VkPipelineColorBlendAttachmentState>& states) {
-  colorBlendAttachmentStates_ = std::move(states);
+    lvk::Span<VkPipelineColorBlendAttachmentState> states) {
+  IGL_ASSERT(states.size() <= IGL_COLOR_ATTACHMENTS_MAX);
+
+  if (numColorAttachments_) {
+    IGL_ASSERT(numColorAttachments_ == states.size());
+  }
+
+  for (size_t i = 0; i != states.size(); i++) {
+    colorBlendAttachmentStates_[i] = states[i];
+  }
+
+  numColorAttachments_ = static_cast<uint32_t>(states.size());
+
   return *this;
 }
 
-VulkanPipelineBuilder& VulkanPipelineBuilder::colorAttachmentFormats(
-    std::vector<VkFormat>& formats) {
-  colorAttachmentFormats_ = std::move(formats);
+VulkanPipelineBuilder& VulkanPipelineBuilder::colorAttachmentFormats(lvk::Span<VkFormat> formats) {
+  IGL_ASSERT(formats.size() <= IGL_COLOR_ATTACHMENTS_MAX);
+
+  if (numColorAttachments_) {
+    IGL_ASSERT(numColorAttachments_ == formats.size());
+  }
+
+  for (size_t i = 0; i != formats.size(); i++) {
+    colorAttachmentFormats_[i] = formats[i];
+  }
+
+  numColorAttachments_ = static_cast<uint32_t>(formats.size());
+
   return *this;
 }
 
@@ -145,16 +166,13 @@ VkResult VulkanPipelineBuilder::build(VkDevice device,
   const VkPipelineViewportStateCreateInfo viewportState =
       ivkGetPipelineViewportStateCreateInfo(nullptr, nullptr);
   const VkPipelineColorBlendStateCreateInfo colorBlendState =
-      ivkGetPipelineColorBlendStateCreateInfo(uint32_t(colorBlendAttachmentStates_.size()),
-                                              colorBlendAttachmentStates_.data());
-
-  IGL_ASSERT(colorAttachmentFormats_.size() == colorBlendAttachmentStates_.size());
+      ivkGetPipelineColorBlendStateCreateInfo(numColorAttachments_, colorBlendAttachmentStates_);
 
   const VkPipelineRenderingCreateInfo renderingInfo = {
       .sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR,
       .pNext = nullptr,
-      .colorAttachmentCount = (uint32_t)colorAttachmentFormats_.size(),
-      .pColorAttachmentFormats = colorAttachmentFormats_.data(),
+      .colorAttachmentCount = numColorAttachments_,
+      .pColorAttachmentFormats = colorAttachmentFormats_,
       .depthAttachmentFormat = depthAttachmentFormat_,
       .stencilAttachmentFormat = stencilAttachmentFormat_,
   };

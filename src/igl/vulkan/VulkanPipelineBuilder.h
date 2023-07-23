@@ -37,9 +37,8 @@ class VulkanPipelineBuilder final {
   VulkanPipelineBuilder& polygonMode(VkPolygonMode mode);
   VulkanPipelineBuilder& vertexInputState(const VkPipelineVertexInputStateCreateInfo& state);
   VulkanPipelineBuilder& colorBlendAttachmentStates(
-      std::vector<VkPipelineColorBlendAttachmentState>& states);
-  VulkanPipelineBuilder& colorAttachmentFormats(
-      std::vector<VkFormat>& formats);
+      lvk::Span<VkPipelineColorBlendAttachmentState> states);
+  VulkanPipelineBuilder& colorAttachmentFormats(lvk::Span<VkFormat> formats);
   VulkanPipelineBuilder& depthAttachmentFormat(VkFormat format);
   VulkanPipelineBuilder& stencilAttachmentFormat(VkFormat format);
 
@@ -62,8 +61,9 @@ class VulkanPipelineBuilder final {
   VkPipelineRasterizationStateCreateInfo rasterizationState_;
   VkPipelineMultisampleStateCreateInfo multisampleState_;
   VkPipelineDepthStencilStateCreateInfo depthStencilState_;
-  std::vector<VkPipelineColorBlendAttachmentState> colorBlendAttachmentStates_;
-  std::vector<VkFormat> colorAttachmentFormats_;
+  VkPipelineColorBlendAttachmentState colorBlendAttachmentStates_[IGL_COLOR_ATTACHMENTS_MAX] = {};
+  VkFormat colorAttachmentFormats_[IGL_COLOR_ATTACHMENTS_MAX] = {};
+  uint32_t numColorAttachments_ = 0;
   VkFormat depthAttachmentFormat_ = VK_FORMAT_UNDEFINED;
   VkFormat stencilAttachmentFormat_ = VK_FORMAT_UNDEFINED;
   static uint32_t numPipelinesCreated_;

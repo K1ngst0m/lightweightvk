@@ -299,11 +299,8 @@ VkPipeline RenderPipelineState::getVkPipeline(
 
   // Not all attachments are valid. We need to create color blend attachments only for active
   // attachments
-  std::vector<VkPipelineColorBlendAttachmentState> colorBlendAttachmentStates;
-  colorBlendAttachmentStates.resize(numColorAttachments);
-
-  std::vector<VkFormat> colorAttachmentFormats;
-  colorAttachmentFormats.resize(numColorAttachments);
+  VkPipelineColorBlendAttachmentState colorBlendAttachmentStates[IGL_COLOR_ATTACHMENTS_MAX];
+  VkFormat colorAttachmentFormats[IGL_COLOR_ATTACHMENTS_MAX];
 
   for (uint32_t i = 0; i != numColorAttachments; i++) {
     const auto& attachment = desc_.colorAttachments[i];
@@ -381,8 +378,8 @@ VkPipeline RenderPipelineState::getVkPipeline(
       .cullMode(cullModeToVkCullMode(desc_.cullMode))
       .frontFace(windingModeToVkFrontFace(desc_.frontFaceWinding))
       .vertexInputState(vertexInputStateCreateInfo_)
-      .colorBlendAttachmentStates(colorBlendAttachmentStates)
-      .colorAttachmentFormats(colorAttachmentFormats)
+      .colorBlendAttachmentStates({colorBlendAttachmentStates, numColorAttachments})
+      .colorAttachmentFormats({colorAttachmentFormats, numColorAttachments})
       .depthAttachmentFormat(textureFormatToVkFormat(desc_.depthAttachmentFormat))
       .stencilAttachmentFormat(textureFormatToVkFormat(desc_.stencilAttachmentFormat))
       .build(ctx.getVkDevice(),
