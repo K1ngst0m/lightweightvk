@@ -501,6 +501,41 @@ enum ShaderStage : uint8_t {
   kNumShaderStages,
 };
 
+template <typename T>
+class Span {
+ public:
+  Span() = default;
+  Span(T* data, size_t numElements) : data_(data), numElements_(numElements) {}
+  const T& operator[](size_t idx) const {
+    return data_[idx];
+  };
+  T& operator[](size_t idx) {
+    return data_[idx];
+  };
+  size_t size() const {
+    return numElements_;
+  }
+  size_t size_bytes() const {
+    return sizeof(T) * numElements_;
+  }
+  bool empty() const {
+    return numElements_ == 0;
+  }
+  T* data() const {
+    return data_;
+  }
+  T* begin() {
+    return data_;
+  }
+  T* end() {
+    return data_ + numElements_;
+  }
+
+ private:
+  T* data_ = nullptr;
+  size_t numElements_ = 0;
+};
+
 struct VertexInput final {
   enum { IGL_VERTEX_ATTRIBUTES_MAX = 16 };
   enum { IGL_VERTEX_BUFFER_MAX = 16 };
